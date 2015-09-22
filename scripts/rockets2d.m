@@ -1,26 +1,28 @@
 function res = rockets2d()
+
     radius = 0.2;
     Cd = 0.7;
     m_shell = 100;
     mfuel_init = 300; %kg
     v_ex = 10000; %m/s
     flow = 1; %kg/s
-    g = 9.8;
-    p0 = 1.225;
+    p0 = 1.225;  % inital air denisty
     me = 5.972e24;
     G = 6.67384e-11;
     r_e = 6371000;
     A = pi * radius^2;
+    mstage = [12, 12, 12, 12, 12];
     
-    I = [r_e, 0, sind(89.4575), cosd(89.4575), mfuel_init]; %x,y,vx,vy,mfuel_init
+    I = [r_e, 0, sind(90), cosd(90), mfuel_init]; %x,y,vx,vy,mfuel_init
    
     function dXdt = derivs(t, X)
         rx = X(1);
         ry = X(2);
         vx = X(3);
         vy = X(4);
-        m = X(5);
-       
+        m_fuel = X(5);
+ 
+        
         r_vec = [rx;ry]; % r = xi+yj
         r_hat = r_vec ./ norm(r_vec);
         v_vec = [vx; vy]; %v = vx;i + vyi 
@@ -28,24 +30,29 @@ function res = rockets2d()
         h = norm(r_vec) - r_e;
         p = p0*exp(-h/8000);
         
-        if m_shell+m > m_shell
-            Ft = (flow*v_ex)*v_hat;
+        if m_fuel > 0
+            Ft = v_ex * log(flow / .25*m_fuel + m_shell) * v_hat;
             dmdt = -flow;
         else
+            m_fuel = 0;
             Ft = [0;0];
             dmdt = 0;
         end
         
+        stagen = 6 - ceil(m_fuel/60);
+        attachedstages = sum(mstage(stagen:end));
+        hey =  [stagen, attachedstages, m_fuel]
+        
         drxdt = vx;
         drydt = vy;
-        Fg = (-G*(m+m_shell)*me/(norm(r_vec))^2)*r_hat;
+        Fg = (-G * (m_fuel + m_shell + attachedstages)*me/(norm(r_vec))^2)*r_hat;
         Fd = (-1/2*Cd*p*norm(v_vec)^2*A)*v_hat;
-        a = (Fg + Fd + Ft)/(m+m_shell);
+        a = (Fg + Fd + Ft) / ( m_fuel + m_shell + attachedstages);
         %dvxdt = (-G*(m+m_shell)*me/(rx)^2*r_hat -1/2*Cd*p*vx^2*A + flow*v_ex)/(m+m_shell);
         %dvydt = (-G*(m+m_shell)*me/(ry)^2*r_hat -1/2*Cd*p*vy^2*A + flow*v_ex)/(m+m_shell);
      
         
-
+ 
         dXdt = [drxdt;drydt; a; dmdt];
         
     end
@@ -62,7 +69,7 @@ function res = rockets2d()
         terminal = 1;
         
     end
-
+ 
     time = 40000;
     options = odeset('Events', @events);
     [T, M] = ode45(@derivs,[0 time], I, options);
@@ -86,7 +93,5 @@ function res = rockets2d()
     axis equal
     %plot(vx_pos, vy_pos)
     legend('position')
-    
-    
-
+ 
 end
