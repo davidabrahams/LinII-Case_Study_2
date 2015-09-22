@@ -12,6 +12,7 @@ function res = rockets2d()
     r_e = 6371000;
     A = pi * radius^2;
     mstage = [12, 12, 12, 12, 12];
+    stagen = 1;
     
     I = [r_e, 0, sind(90), cosd(90), mfuel_init]; %x,y,vx,vy,mfuel_init
    
@@ -21,7 +22,6 @@ function res = rockets2d()
         vx = X(3);
         vy = X(4);
         m_fuel = X(5);
- 
         
         r_vec = [rx;ry]; % r = xi+yj
         r_hat = r_vec ./ norm(r_vec);
@@ -37,6 +37,15 @@ function res = rockets2d()
             m_fuel = 0;
             Ft = [0;0];
             dmdt = 0;
+        end
+               
+        if stagen == 6
+            m_fuel = 0;
+            attachedstages = 0;
+        else
+            stagen = 6 - ceil(m_fuel/60);
+            attachedstages = sum(mstage(stagen:end));
+            hey =  [stagen, attachedstages, m_fuel]
         end
         
         stagen = 6 - ceil(m_fuel/60);
@@ -93,5 +102,5 @@ function res = rockets2d()
     axis equal
     %plot(vx_pos, vy_pos)
     legend('position')
- 
+    
 end
