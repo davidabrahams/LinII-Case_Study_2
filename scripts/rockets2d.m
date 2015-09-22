@@ -1,9 +1,9 @@
 function res = rockets2d()
-
+ 
     radius = 0.2;
     Cd = 0.7;
     m_shell = 100;
-    mfuel_init = 300; %kg
+    mfuel_init = 324; %kg
     v_ex = 10000; %m/s
     flow = 1; %kg/s
     p0 = 1.225;  % inital air denisty
@@ -11,7 +11,7 @@ function res = rockets2d()
     G = 6.67384e-11;
     r_e = 6371000;
     A = pi * radius^2;
-    mstage = [12, 12, 12, 12, 12];
+    mstage = [12, 12, 12, 12, 12, 12, 12];
     stagen = 1;
     
     I = [r_e, 0, sind(90), cosd(90), mfuel_init]; %x,y,vx,vy,mfuel_init
@@ -39,18 +39,14 @@ function res = rockets2d()
             dmdt = 0;
         end
                
-        if stagen == 6
+        if stagen == length(mstage)+1
             m_fuel = 0;
             attachedstages = 0;
         else
-            stagen = 6 - ceil(m_fuel/60);
+            stagen = length(mstage)+1 - ceil(m_fuel/60);
             attachedstages = sum(mstage(stagen:end));
             hey =  [stagen, attachedstages, m_fuel]
         end
-        
-        stagen = 6 - ceil(m_fuel/60);
-        attachedstages = sum(mstage(stagen:end));
-        hey =  [stagen, attachedstages, m_fuel]
         
         drxdt = vx;
         drydt = vy;
