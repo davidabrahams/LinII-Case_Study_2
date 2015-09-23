@@ -1,11 +1,11 @@
 function [speed_diff, speed_eq] = get_top_speed(mstage)
 
-    time = 150; % simulation time
+    time = 1500; % simulation time
     v_orbit = 7.8e3;
-    radius = 5; % the radius of the rocket
+    radius = 1; % the radius of the rocket
     C_d = 0.3; % the drag coefficient of the rocket
     payload = 1000; % the weight of the payload
-    v_exhaust = 30000; %exhaust velocity in m/s
+    v_exhaust = 3000; %exhaust velocity in m/s
     flow_rate = 122; % rate of fuel consumption kg/s
     p0 = 1.225;  % inital air denisty
     m_earth = 5.972e24; % mass of earth
@@ -49,10 +49,9 @@ function [speed_diff, speed_eq] = get_top_speed(mstage)
         
         % calculate velocity and acceleration from forces
         F_g = -G * m_total * m_earth / height^2;
-        % TODO: THIS IS BROKEN
         F_d = -(1/2) * C_d * atm_density * velocity^2 * rocket_area * ... 
             sign(velocity);
-        accel = (F_g + Ft + F_d) / m_total;
+        accel = (Ft + F_g + F_d) / m_total;
 
         res = [velocity; accel; dmdt];
 
@@ -88,9 +87,9 @@ function [speed_diff, speed_eq] = get_top_speed(mstage)
     total_weight = attached_stage_weight + Fuel + payload;
     
     % Plot stuff
-%     clf;
-%     hold on;
-%     plot(T, Height);
+    clf;
+    hold all;
+    plot(T, Height);
     
     % Return the top speed
     speed_diff = v_orbit - max(Velocity);
