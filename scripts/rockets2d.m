@@ -52,9 +52,9 @@ function top_speed = rockets2d(mstage)
         % TODO: THIS IS BROKEN
         F_d = -(1/2) * C_d * atm_density * velocity^2 * rocket_area * ... 
             sign(velocity);
-        rocket_area = (F_g + Ft) / m_total;
+        accel = (F_g + Ft + F_d) / m_total;
 
-        res = [velocity; rocket_area; dmdt];
+        res = [velocity; accel; dmdt];
 
     end
 
@@ -85,10 +85,12 @@ function top_speed = rockets2d(mstage)
         [~, attached_stage_weight(i, 1)] = get_stage_n(mstage, Fuel(i));
     end
     
+    total_weight = attached_stage_weight + Fuel + payload;
+    
     % Plot stuff
     clf;
     hold on;
-    plot(T, Height);
+    plot(T, total_weight);
     
     % Return the top speed
     top_speed = max(Velocity);
