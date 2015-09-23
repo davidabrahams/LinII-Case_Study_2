@@ -1,4 +1,4 @@
-function top_speed = rockets2d(mstage)
+function top_speed = get_top_speed(mstage)
 
     time = 1500; % simulation time
 
