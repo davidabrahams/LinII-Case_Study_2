@@ -8,14 +8,12 @@ function [res, top_speed] = find_optimal_fuel(num_stages)
     payload = 1000; % the weight of the payload
     max_weight = (flow_rate * v_exhaust / 9.81 - payload) / 5;
     
-    
     x0 = ones(num_stages, 1) * max_weight / 4 * 1.25; % this is our initial guess
 
     function res = optimize_cost(mstages)
         res = cost_per_kg*(5*sum(mstages) + payload) + fuel_price * ...
             sum(mstages)*4 + cost_per_stage*length(mstages);
     end
-
 
     lb = ones(num_stages, 1) * 20;
     ub = [];
