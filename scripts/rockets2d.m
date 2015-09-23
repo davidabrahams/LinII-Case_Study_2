@@ -3,61 +3,66 @@ function top_speed = rockets2d(mstage)
     time = 1500; % simulation time
 
     radius = 5; % the radius of the rocket
-    Cd = 0.3; % the drag coefficient of the rocket
+    C_d = 0.3; % the drag coefficient of the rocket
     payload = 1000; % the weight of the payload
-    v_ex = 3000; %exhaust velocity in m/s
-    flow = 122; % rate of fuel consumption kg/s
+    v_exhaust = 3000; %exhaust velocity in m/s
+    flow_rate = 122; % rate of fuel consumption kg/s
     p0 = 1.225;  % inital air denisty
-    me = 5.972e24; % mass of earth
+    m_earth = 5.972e24; % mass of earth
     G = 6.67384e-11;
-    r_e = 6378e3; % radius of Earth
-    a = pi * radius^2; % surface area of rocket
-    mfuel_init = sum(mstage) * 4;
+    r_earth = 6378e3; % radius of Earth
+    rocket_area = pi * radius^2; % surface area of rocket
+    m_fuel_init = sum(mstage) * 4;
     atm_scale_height = 7000; % km
-    stage_n = 1;
 
-    Initial_Conidition = [r_e, 0, mfuel_init]; % Stage variables are height, velocity, and fuel
+    % Stage variables are height, velocity, and fuel
+    Initial_Conidition = [r_earth, 0, m_fuel_init];
 
-
-    function res = derivs(t, X)
-
-        r = X(1);
-        v = X(2);
+    % The derivs function to pass to ODE
+    function res = derivs(~, X)
+        
+        % Unpack things
+        height = X(1);
+        velocity = X(2);
         m_fuel = X(3);
-
+        
+        % If there's fuel, use conservation of momentum to calculate force
         if m_fuel > 0
-            Ft = v_ex * flow;
-            dmdt = -flow;
+            Ft = v_exhaust * flow_rate;
+            dmdt = -flow_rate;
+            
+        % otherwise, no thrust
         else
             m_fuel = 0;
             Ft = 0;
             dmdt = 0;
         end
-
-        [stage_n, attached_stage_weight] = get_stage_n(mstage, m_fuel);
-        % For some reason this still flickers.
-%       disp([stage_n, attached_stage_weight, m_fuel]);
+        
+        % The total mass of the ship is the mass of the fuel, payload, and
+        % attached stages
+        [~, attached_stage_weight] = get_stage_n(mstage, m_fuel);
         m_total = payload + m_fuel + attached_stage_weight;
 
-        h = r - r_e;
-        p = p0 * exp(-h / atm_scale_height);
+        % calculate currnet air density based on height
+        height_off_surface = height - r_earth;
+        atm_density = p0 * exp(- height_off_surface / atm_scale_height);
+        
+        % calculate velocity and acceleration from forces
+        F_g = -G * m_total * m_earth / height^2;
+        F_d = -(1/2) * C_d * atm_density * velocity^2 * rocket_area * ... 
+            sign(velocity);
+        rocket_area = (F_g + Ft + F_d) / m_total;
 
-        drdt = v;
-        Fg = -G * m_total * me / r^2;
-        % TODO: CHECK IF THIS IS RIGHT!
-        Fd = -(1/2) * Cd * p * v^2 * a;
-        a = (Fg + Ft) / m_total;
-
-
-        res = [drdt; a; dmdt];
+        res = [velocity; rocket_area; dmdt];
 
     end
 
+    % This event happens when the rocket hits Earth on its way down
     function [value, terminal, direction] = events(~,W)
-        r = W(1);
-        v = W(2);
+        
+        height = W(1);
 
-        h = r - r_e;
+        h = height - r_earth;
         value = h;
         direction = -1;
         terminal = 1;
@@ -68,14 +73,23 @@ function top_speed = rockets2d(mstage)
     options = odeset('Events', @events);
     [T, M] = ode45(@derivs, [0, time], Initial_Conidition, options);
 
-    r = M(:,1) - r_e;
-    v = M(:,2);
-    fuel = M(:,3);
-
+    % Unpack ODE
+    Height = M(:,1) - r_earth;
+    Velocity = M(:,2);
+    Fuel = M(:,3);
+    
+    % Generate Attached Stage Weight
+    attached_stage_weight = zeros(length(Fuel), 1);
+    for i=1:length(attached_stage_weight)
+        [~, attached_stage_weight(i, 1)] = get_stage_n(mstage, Fuel(i));
+    end
+    
+    % Plot stuff
     clf;
     hold on;
-    plot(T, v);
-
-    top_speed = max(v);
+    plot(T, Height);
+    
+    % Return the top speed
+    top_speed = max(Velocity);
 
 end
