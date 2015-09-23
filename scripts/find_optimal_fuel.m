@@ -2,6 +2,8 @@ function res = find_optimal_fuel(num_stages)
 
     payload = 1000;
     
+    
+    
     x0 = ones(num_stages, 1);
 
     function res = optimize_cost(mstages)
@@ -10,8 +12,5 @@ function res = find_optimal_fuel(num_stages)
     
     
     x = fmincon(@optimize_cost, x0, a, b, Aeq, Beq, lb, ub, @rockets2d);
-
-
-
 
 end
