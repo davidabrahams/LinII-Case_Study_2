@@ -1,7 +1,7 @@
-function top_speed = rockets2d(mstage)
+function [speed_diff, speed_eq] = get_top_speed(mstage)
 
     time = 1500; % simulation time
-
+    v_orbit = 7.8e3;
     radius = 5; % the radius of the rocket
     C_d = 0.3; % the drag coefficient of the rocket
     payload = 1000; % the weight of the payload
@@ -13,7 +13,7 @@ function top_speed = rockets2d(mstage)
     r_earth = 6378e3; % radius of Earth
     rocket_area = pi * radius^2; % surface area of rocket
     m_fuel_init = sum(mstage) * 4;
-    atm_scale_height = 7000; % km
+    atm_scale_height = 7000; % m
 
     % Stage variables are height, velocity, and fuel
     Initial_Conidition = [r_earth, 0, m_fuel_init];
@@ -93,6 +93,7 @@ function top_speed = rockets2d(mstage)
     plot(T, total_weight);
     
     % Return the top speed
-    top_speed = max(Velocity);
+    speed_diff = v_orbit - max(Velocity);
+    speed_eq = [];
 
 end
