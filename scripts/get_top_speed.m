@@ -90,7 +90,7 @@ function [speed_diff, speed_eq] = get_top_speed(mstage)
     % Plot stuff
     clf;
     hold on;
-    plot(T, total_weight);
+    plot(T, Height);
     
     % Return the top speed
     speed_diff = v_orbit - max(Velocity);
