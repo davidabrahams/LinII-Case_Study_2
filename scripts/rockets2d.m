@@ -49,9 +49,10 @@ function top_speed = rockets2d(mstage)
         
         % calculate velocity and acceleration from forces
         F_g = -G * m_total * m_earth / height^2;
+        % TODO: THIS IS BROKEN
         F_d = -(1/2) * C_d * atm_density * velocity^2 * rocket_area * ... 
             sign(velocity);
-        rocket_area = (F_g + Ft + F_d) / m_total;
+        rocket_area = (F_g + Ft) / m_total;
 
         res = [velocity; rocket_area; dmdt];
 
