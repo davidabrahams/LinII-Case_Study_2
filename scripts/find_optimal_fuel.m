@@ -1,8 +1,8 @@
-function [res, top_speed] = find_optimal_fuel(num_stages)
+function [res, top_speed, cost] = find_optimal_fuel(num_stages)
 
     cost_per_kg = 5500;
     fuel_price = 2.72;
-    cost_per_stage = 500e3;
+    cost_per_stage = 50e6;
     flow_rate = 122; % rate of fuel consumption kg/s
     v_exhaust = 30000; %exhaust velocity in m/s
     payload = 1000; % the weight of the payload
@@ -26,5 +26,6 @@ function [res, top_speed] = find_optimal_fuel(num_stages)
         @get_top_speed_2);
     
     top_speed = get_top_speed_2(res);
-
+    cost = optimize_cost(res);
+    
 end
