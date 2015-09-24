@@ -1,4 +1,5 @@
-function [stage_n, attached_stage_weight] = get_stage_n(stage_masses, current_fuel_mass)
+function [stage_n, attached_stage_weight] = get_stage_n(stage_masses, ... 
+    current_fuel_mass)
 
     temp_mass = current_fuel_mass;
     stage_n = length(stage_masses) + 1;
